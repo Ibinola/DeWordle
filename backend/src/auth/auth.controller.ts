@@ -43,7 +43,6 @@ export class AuthController {
         value: {
           email: 'user@example.com',
           password: 'password123',
-          walletAddress: '0x742d35Cc6634C0532925a3b8D8Cc6f9b2F3d217',
         },
       },
     },
@@ -57,7 +56,6 @@ export class AuthController {
         user: {
           id: 1,
           email: 'user@example.com',
-          walletAddress: '0x742d35Cc6634C0532925a3b8D8Cc6f9b2F3d217',
         },
       },
     },
@@ -80,7 +78,6 @@ export class AuthController {
         message: [
           'email must be an email',
           'password must be longer than or equal to 6 characters',
-          'walletAddress must be a valid Ethereum address',
         ],
         error: 'Bad Request',
       },

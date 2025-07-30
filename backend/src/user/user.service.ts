@@ -28,8 +28,12 @@ export class UserService {
     return this.userRepository.findOne({ where: { email } });
   }
 
-  async findByWalletAddress(walletAddress: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { walletAddress } });
+  // async findByWalletAddress(walletAddress: string): Promise<User | null> {
+  //   return this.userRepository.findOne({ where: { walletAddress } });
+  // }
+
+  async findByUserName(username: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { username } });
   }
 
   // Additional methods needed by the controller

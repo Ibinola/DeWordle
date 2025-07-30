@@ -9,6 +9,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { GameSession } from 'src/game-sessions/entities/game-session.entity';
+import { Optional } from '@nestjs/common';
 
 @Entity('users')
 export class User {
@@ -56,6 +57,7 @@ export class User {
   @OneToMany(() => GameSession, (session) => session.user)
   sessions: GameSession[];
 
+  @Optional()
   @ApiProperty({
     description: 'Ethereum wallet address (must be unique)',
     example: '0x742d35Cc6634C0532925a3b8D8Cc6f9b2F3d217',
@@ -64,7 +66,8 @@ export class User {
     maxLength: 42,
     minLength: 42,
   })
-  @Column({ unique: true })
+  // @Column({ unique: true })
+  @Column({ nullable: true })
   walletAddress: string;
 
   @ApiPropertyOptional({

@@ -21,10 +21,10 @@ export class AuthService {
     user: {
       id: number;
       email: string;
-      walletAddress: string;
+      username: string;
     };
   }> {
-    const { email, password, walletAddress } = signupDto;
+    const { email, password, username } = signupDto;
 
     // Check if email already exists
     const existingByEmail = await this.userService.findByEmail(email);
@@ -32,21 +32,26 @@ export class AuthService {
       throw new ConflictException('Email already exists');
     }
 
-    // Check if wallet address already exists
-    const existingByWallet =
-      await this.userService.findByWalletAddress(walletAddress);
-    if (existingByWallet) {
-      throw new ConflictException('Wallet address already exists');
+    const existingUserName = await this.userService.findByUserName(username);
+    if (existingUserName) {
+      throw new ConflictException('Username already exists');
     }
+
+    // Check if wallet address already exists
+    // const existingByWallet =
+    //   await this.userService.findByWalletAddress(walletAddress);
+    // if (existingByWallet) {
+    //   throw new ConflictException('Wallet address already exists');
+    // }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
     const newUser = await this.userService.create({
+      username,
       email,
       password: hashedPassword,
-      walletAddress,
     });
 
     const token = this.generateToken(newUser.id, newUser.email);
@@ -56,7 +61,7 @@ export class AuthService {
       user: {
         id: newUser.id,
         email: newUser.email,
-        walletAddress: newUser.walletAddress,
+        username: newUser.username,
       },
     };
   }
@@ -66,8 +71,8 @@ export class AuthService {
     user: {
       id: number;
       email: string;
-      walletAddress: string;
     };
+    success_message: string;
   }> {
     const { email, password } = loginDto;
 
@@ -88,15 +93,14 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        walletAddress: user.walletAddress,
       },
+      success_message: 'Sign in Successful',
     };
   }
 
   async getProfile(userId: number): Promise<{
     id: number;
     email: string;
-    walletAddress: string;
     createdAt: Date;
   }> {
     const user = await this.userService.findById(userId);
@@ -107,7 +111,6 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      walletAddress: user.walletAddress,
       createdAt: user.createdAt,
     };
   }

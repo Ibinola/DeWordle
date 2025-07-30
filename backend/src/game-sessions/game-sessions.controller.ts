@@ -13,6 +13,8 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-guard.guard';
 import { Request } from 'express';
 import { GameSessionsService } from './game-sessions.service';
 import { User } from 'src/auth/entities/user.entity';
+import { GameSession } from './entities/game-session.entity';
+import { CreateGuessDto } from './dto/create-guess.dto';
 
 @Controller('sessions')
 export class GameSessionsController {
@@ -59,15 +61,29 @@ export class GameSessionsController {
   getGuestSessions(@Query('guestId') guestId: string) {
     return this.sessionService.getUserSessions(null, guestId);
   }
-
+  
+  /**
+   * Submit a guess to an existing session.
+   *
+   */
+  @UseGuards(JwtAuthGuard)
   @Post(':id/guess')
-  // @UseGuards(JwtAuthGuard)
   async submitGuess(
-    @Param('id') sessionId: number,
-    @Body('guess') guess: string,
+    @Param('id') sessionId: GameSession['id'],
+    @Body() { guess }: CreateGuessDto,
     @Req() req: Request,
   ) {
     const user = req.user as User;
-    return this.sessionService.submitGuess(sessionId, guess, user);
+
+    return await this.sessionService.guess(sessionId, guess, user);
+  }
+
+  @Post(':id/guest-guess')
+  async submitGuessAsGuest(
+    @Param('id') sessionId: GameSession['id'],
+    @Body() { guess }: CreateGuessDto,
+    @Query('guestId') guestId: string,
+  ) {
+    return this.sessionService.guess(sessionId, guess, null, guestId);
   }
 }

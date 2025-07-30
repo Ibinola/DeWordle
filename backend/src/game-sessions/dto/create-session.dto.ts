@@ -1,4 +1,11 @@
-import { IsInt, IsOptional, IsJSON, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsJSON,
+  IsNotEmpty,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class GuestMetadataDto {

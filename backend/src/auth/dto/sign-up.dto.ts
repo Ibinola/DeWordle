@@ -5,6 +5,7 @@ import {
   IsEthereumAddress,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Optional } from '@nestjs/common';
 
 export class SignupDto {
   @ApiProperty({
@@ -16,6 +17,13 @@ export class SignupDto {
   email: string;
 
   @ApiProperty({
+    description: 'Username',
+    example: 'johndoe',
+    format: 'text',
+  })
+  username: string;
+
+  @ApiProperty({
     description: 'User password (minimum 6 characters)',
     example: 'password123',
     minLength: 6,
@@ -24,6 +32,7 @@ export class SignupDto {
   @MinLength(6)
   password: string;
 
+  @Optional()
   @ApiProperty({
     description: 'Ethereum wallet address',
     example: '0x742d35Cc6634C0532925a3b8D8Cc6f9b2F3d217',

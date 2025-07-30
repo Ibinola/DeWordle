@@ -9,7 +9,7 @@ import * as moment from 'moment-timezone';
 import { DictionaryHelper, EnrichedWord } from '../../utils/dictionary.helper';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Word as WordEntity } from 'src/entities/word.entity';
+import { Word as WordEntity } from '../../entities/word.entity';
 import { WordScoringProvider } from './providers/word-scoring-provider';
 import { CreateWordDto } from './dto/create-word.dto';
 
@@ -29,7 +29,7 @@ export class WordsService {
     @InjectRepository(WordEntity)
     private readonly wordRepo: Repository<WordEntity>,
 
-    private readonly wordScoringProvider: WordScoringProvider
+    private readonly wordScoringProvider: WordScoringProvider,
   ) {
     // Seed the words when the service is initialized
     this.seedWords();
@@ -266,7 +266,7 @@ export class WordsService {
   }
 
   public async wordScoring(word: string) {
-    return this.wordScoringProvider.scoreWord(word)
+    return this.wordScoringProvider.scoreWord(word);
   }
 
   async tagAllWords() {
@@ -285,8 +285,8 @@ export class WordsService {
   }
 
   public async createWord(createDto: CreateWordDto): Promise<WordEntity> {
-  const difficulty = this.wordScoringProvider.scoreWord(createDto.word);
-  const word = this.wordRepo.create({ ...createDto, difficulty });
-  return this.wordRepo.save(word);
-}
+    const difficulty = this.wordScoringProvider.scoreWord(createDto.word);
+    const word = this.wordRepo.create({ ...createDto, difficulty });
+    return this.wordRepo.save(word);
+  }
 }
