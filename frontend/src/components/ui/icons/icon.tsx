@@ -201,3 +201,33 @@ export const MenuIcon = ({
     />
   </svg>
 );
+
+export const ScrollIcon = ({
+  ...props
+}: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="17"
+    height="17"
+    viewBox="0 0 17 17"
+    fill="none"
+    {...props}
+  >
+    <g opacity="0.6">
+      <path
+        d="M8.0627 14.983C11.7371 14.983 14.7157 12.0043 14.7157 8.32992C14.7157 4.65555 11.7371 1.67688 8.0627 1.67688C4.38833 1.67688 1.40967 4.65555 1.40967 8.32992C1.40967 12.0043 4.38833 14.983 8.0627 14.983Z"
+        stroke="white"
+        strokeWidth="0.661357"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.7238 6.99963L8.06258 9.66085L5.40137 6.99963"
+        stroke="white"
+        strokeWidth="0.661357"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);

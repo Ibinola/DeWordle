@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -182,7 +185,7 @@
 
     /* Dark theme colors */
     --dark-100: #0e002b;
-    
+
     --dark-200: #1a0040;
     --dark-300: #261355;
     --dark-350: #261352;
@@ -255,7 +258,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Add font utilities */
+html {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @layer utilities {
   .font-clash {
     font-family: var(--font-clash-display), sans-serif;

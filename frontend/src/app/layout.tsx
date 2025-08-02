@@ -3,6 +3,7 @@ import { Geist, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "../../context/AuthContext";
+import Header from "@/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,7 @@ const clashDisplay = localFont({
   src: [
     {
       path: "../fonts/ClashDisplay-Variable.ttf",
-      weight: "400",
+      weight: "400,500,600,700",
       style: "normal",
     },
   ],
@@ -43,9 +44,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${inter.variable} ${jakartaSans.variable} ${clashDisplay.variable} antialiased`}
+        className={`${geistSans.variable} ${inter.variable} ${jakartaSans.variable} ${clashDisplay.variable} antialiased hide-scrollbar`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Header />
+          <main className="flex flex-col relative w-full bg-primary-950 min-h-screen h-full overflow-x-hidden hide-scrollbar">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );
