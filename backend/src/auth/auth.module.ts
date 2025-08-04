@@ -8,10 +8,12 @@ import { UserModule } from '../user/user.module';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { PasswordReset } from './entities/password-reset.entity';
+import { EmailService } from './email.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, PasswordReset]),
     UserModule,
     PassportModule,
     JwtModule.register({
@@ -20,7 +22,7 @@ import { User } from './entities/user.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, EmailService],
   exports: [AuthService],
 })
 export class AuthModule {}

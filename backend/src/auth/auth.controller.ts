@@ -22,11 +22,71 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/sign-up.dto';
 import { JwtAuthGuard } from './guards/jwt-guard.guard';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset', description: 'Send a password reset email to the user.' })
+  @ApiBody({
+    type: ForgotPasswordDto,
+    description: 'Forgot password request',
+    examples: {
+      example1: {
+        summary: 'Valid email',
+        value: { email: 'user@example.com' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'If that email exists, a reset link has been sent.',
+    schema: { example: { message: 'If that email exists, a reset link has been sent.' } },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+    schema: { example: { statusCode: 400, message: ['email must be an email'], error: 'Bad Request' } },
+  })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(dto.email);
+    return { message: 'If that email exists, a reset link has been sent.' };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password', description: 'Reset user password using a valid token.' })
+  @ApiBody({
+    type: ResetPasswordDto,
+    description: 'Reset password request',
+    examples: {
+      example1: {
+        summary: 'Valid reset',
+        value: { token: 'reset-token', newPassword: 'newStrongPassword123' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Password has been reset successfully.',
+    schema: { example: { message: 'Password has been reset successfully.' } },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+    schema: { example: { statusCode: 400, message: ['token must be a string', 'newPassword must be longer than or equal to 8 characters'], error: 'Bad Request' } },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or expired reset token',
+    schema: { example: { statusCode: 401, message: 'Invalid or expired reset token', error: 'Unauthorized' } },
+  })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.token, dto.newPassword);
+    return { message: 'Password has been reset successfully.' };
+  }
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)

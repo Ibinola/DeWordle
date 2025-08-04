@@ -46,13 +46,6 @@ export class GameSession {
   })
   history: GuessHistory[];
 
-  @Column({
-    type: 'enum',
-    enum: GameSessionStatus,
-    default: GameSessionStatus.IN_PROGRESS,
-  })
-  status: GameSessionStatus;
-
   toJSON() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { solution, ...rest } = this;

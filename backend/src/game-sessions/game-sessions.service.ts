@@ -102,10 +102,11 @@ export class GameSessionsService {
     }
 
     return [];
-  
-    
+  }
+
   public async submitGuess(sessionId: number, guess: string, user: User | null) {
-    this.submitGuessProvider.submitGuess(sessionId, guess, user)
+    return this.submitGuessProvider.submitGuess(sessionId, guess, user);
+  }
 
   /**
    * Attempt a guess for a specific session
