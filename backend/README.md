@@ -44,6 +44,68 @@ PORT=3000
 NODE_ENV=development
 \`\`\`
 
+
+
+## 🐳 Database Setup with Docker Compose
+
+If you prefer to run a local PostgreSQL database using Docker, you can use the provided `docker-compose.yml` file. This is the fastest way to get a development database up and running.
+
+### Start the Database
+
+```bash
+docker compose up -d
+```
+
+This will start a PostgreSQL 15 database with the following credentials (as set in `.env`):
+
+- **Database**: `dewordledb`
+- **User**: `dewordledb_owner`
+- **Password**: `password`
+- **Port**: `5432`
+
+You can now connect your backend to this local database.
+
+### Stop the Database
+
+```bash
+docker compose down
+```
+
+This will stop and remove the database container. Data is persisted in a Docker volume (`postgres_data`).
+
+> **Note:** Make sure your `.env` file matches the above credentials for local development.
+
+### Development Environment Variables
+
+For local development with Docker Compose, create a `.env.development` file in the project root with the following content:
+
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=dewordledb_owner
+DB_PASSWORD=your_password
+DB_NAME=dewordledb
+DB_SSL=false
+# SSL_MODE=require
+
+# Application
+PORT=3000
+NODE_ENV=development
+
+# Example Neon Database URL format:
+# postgresql://username:password@host:port/database?sslmode=require
+
+# SMTP Configurations
+SMTP_HOST=smtp.ethereal.email
+SMTP_PORT=587
+SMTP_USER=brennan.jacobs98@ethereal.email
+SMTP_PASS=BZwDv2fvcH66zapvUP
+SMTP_FROM=no-reply@dewordle.com
+FRONTEND_URL=http://localhost:3000
+```
+
+This will ensure your backend connects to the local database started by Docker Compose.
 ## 🗄️ Database Configuration
 
 ### Neon PostgreSQL Setup
