@@ -14,6 +14,7 @@ import { EnrichedWord } from '../../utils/dictionary.helper';
 import { WordScheduler } from './word.scheduler';
 import { CreateWordDto } from './dto/create-word.dto';
 import { WordResponseDto } from './dto/word-response.dto';
+import { WordValidationProvider } from './providers/word-validation-provider';
 
 @Controller('words')
 export class WordsController {
@@ -22,6 +23,7 @@ export class WordsController {
   constructor(
     private readonly wordsService: WordsService,
     private readonly wordScheduler: WordScheduler,
+    private readonly wordValidationProvider: WordValidationProvider
   ) {}
 
   @Get('test')
@@ -136,5 +138,11 @@ export class WordsController {
   @ApiResponse({ status: 201, type: WordResponseDto })
   create(@Body() dto: CreateWordDto) {
     return this.wordsService.createWord(dto);
+  }
+  
+  @Post('validate')
+  async validateWord(@Body('word') word: string) {
+    // No validation logic here — service will handle errors
+    return await this.wordValidationProvider.validateWord(word);
   }
 }

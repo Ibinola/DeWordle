@@ -6,6 +6,7 @@ import { Word } from '../../entities/word.entity';
 import { WordSeedService } from '../../utils/word-seed.service';
 import { WordScheduler } from './word.scheduler';
 import { WordScoringProvider } from './providers/word-scoring-provider';
+import { WordValidationProvider } from './providers/word-validation-provider';
 import { WordValidationService } from './word-validation.service';
 
 @Module({
@@ -15,7 +16,7 @@ import { WordValidationService } from './word-validation.service';
     WordsService,
     WordSeedService,
     WordScheduler,
-    WordScoringProvider,
+    WordScoringProvider, WordValidationProvider,
     WordValidationService,
   ],
   exports: [WordsService, WordSeedService, WordValidationService],

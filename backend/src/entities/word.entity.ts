@@ -1,3 +1,4 @@
+import { WordStatus } from '../dewordle/enums/wordStatus.enum';
 import { WordDifficulty } from '../dewordle/enums/wordDifficulty.enum';
 import {
   Entity,
@@ -13,7 +14,7 @@ export class Word {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true, length: 10 })
+  @Column({ unique: true, length: 50 })
   @Index()
   word: string;
 
@@ -41,6 +42,19 @@ export class Word {
     nullable: true,
   })
   difficulty: WordDifficulty;
+
+  @Column({
+    type: 'enum',
+    enum: WordStatus,
+    default: WordStatus.PENDING,
+  })
+  status: WordStatus;
+
+  @Column({ type: 'float', nullable: true })
+  qualityScore?: number;
+
+  @Column('text', { array: true, nullable: true })
+  sources?: string[];
 
   @CreateDateColumn()
   createdAt: Date;

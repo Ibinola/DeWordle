@@ -3,15 +3,17 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import { DictionaryHelper, EnrichedWord } from '../../utils/dictionary.helper';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Word as WordEntity } from '../../entities/word.entity';
 import { WordScoringProvider } from './providers/word-scoring-provider';
 import { CreateWordDto } from './dto/create-word.dto';
+import { WordValidationProvider } from './providers/word-validation-provider';
 
 export interface Word {
   id: string;
@@ -30,6 +32,8 @@ export class WordsService {
     private readonly wordRepo: Repository<WordEntity>,
 
     private readonly wordScoringProvider: WordScoringProvider,
+
+    private readonly wordValidationProvider: WordValidationProvider,
   ) {
     // Seed the words when the service is initialized
     this.seedWords();
@@ -285,8 +289,31 @@ export class WordsService {
   }
 
   public async createWord(createDto: CreateWordDto): Promise<WordEntity> {
+    // Validate before creation
+    const validation = await this.wordValidationProvider.validateWord(
+      createDto.word,
+    );
+
+    if (!validation.valid) {
+      throw new BadRequestException({
+        message: 'Word validation failed',
+        reasons: validation.reasons,
+      });
+    }
+
+    // Score & save
     const difficulty = this.wordScoringProvider.scoreWord(createDto.word);
-    const word = this.wordRepo.create({ ...createDto, difficulty });
+    const word = this.wordRepo.create({
+      ...createDto,
+      difficulty,
+      definition: validation.definition,
+      sources: validation.sources,
+    });
+
     return this.wordRepo.save(word);
+  }
+
+  public async validateWord(wordText: string) {
+    return this.wordValidationProvider.validateWord(wordText);
   }
 }

@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, Not, IsNull } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Word } from 'src/entities/word.entity';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 
 @Injectable()
 export class WordScheduler implements OnModuleInit {
