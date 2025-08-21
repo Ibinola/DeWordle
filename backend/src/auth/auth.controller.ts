@@ -32,7 +32,10 @@ export class AuthController {
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Request password reset', description: 'Send a password reset email to the user.' })
+  @ApiOperation({
+    summary: 'Request password reset',
+    description: 'Send a password reset email to the user.',
+  })
   @ApiBody({
     type: ForgotPasswordDto,
     description: 'Forgot password request',
@@ -46,11 +49,19 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'If that email exists, a reset link has been sent.',
-    schema: { example: { message: 'If that email exists, a reset link has been sent.' } },
+    schema: {
+      example: { message: 'If that email exists, a reset link has been sent.' },
+    },
   })
   @ApiBadRequestResponse({
     description: 'Invalid input data',
-    schema: { example: { statusCode: 400, message: ['email must be an email'], error: 'Bad Request' } },
+    schema: {
+      example: {
+        statusCode: 400,
+        message: ['email must be an email'],
+        error: 'Bad Request',
+      },
+    },
   })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     await this.authService.forgotPassword(dto.email);
@@ -59,7 +70,10 @@ export class AuthController {
 
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reset password', description: 'Reset user password using a valid token.' })
+  @ApiOperation({
+    summary: 'Reset password',
+    description: 'Reset user password using a valid token.',
+  })
   @ApiBody({
     type: ResetPasswordDto,
     description: 'Reset password request',
@@ -77,11 +91,26 @@ export class AuthController {
   })
   @ApiBadRequestResponse({
     description: 'Invalid input data',
-    schema: { example: { statusCode: 400, message: ['token must be a string', 'newPassword must be longer than or equal to 8 characters'], error: 'Bad Request' } },
+    schema: {
+      example: {
+        statusCode: 400,
+        message: [
+          'token must be a string',
+          'newPassword must be longer than or equal to 8 characters',
+        ],
+        error: 'Bad Request',
+      },
+    },
   })
   @ApiUnauthorizedResponse({
     description: 'Invalid or expired reset token',
-    schema: { example: { statusCode: 401, message: 'Invalid or expired reset token', error: 'Unauthorized' } },
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Invalid or expired reset token',
+        error: 'Unauthorized',
+      },
+    },
   })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.authService.resetPassword(dto.token, dto.newPassword);

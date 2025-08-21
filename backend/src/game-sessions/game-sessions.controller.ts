@@ -61,7 +61,7 @@ export class GameSessionsController {
   getGuestSessions(@Query('guestId') guestId: string) {
     return this.sessionService.getUserSessions(null, guestId);
   }
-  
+
   /**
    * Submit a guess to an existing session.
    *
