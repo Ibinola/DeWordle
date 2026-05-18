@@ -1,0 +1,9 @@
+{
+  "network": "mainnet",
+  "contracts": {
+    "admin_registry": "",
+    "core_game": "",
+    "rewards": "",
+    "achievements": ""
+  }
+}

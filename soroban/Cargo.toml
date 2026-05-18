@@ -1,0 +1,19 @@
+[workspace]
+members = [
+  "contracts/core_game",
+  "contracts/rewards",
+  "contracts/achievements",
+  "contracts/admin_registry",
+  "crates/dewordle-types",
+  "crates/dewordle-auth",
+  "crates/dewordle-utils",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+soroban-sdk = "22.0.1"

@@ -1,5 +1,21 @@
 {
-  "dependencies": {
-    "env-paths": "^3.0.0"
+  "name": "dewordle",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
+    "typecheck": "npm run typecheck --prefix backend && npm run typecheck --prefix frontend",
+    "test": "npm run test --prefix backend",
+    "test:e2e": "npm run test:e2e --prefix backend",
+    "build": "npm run build --prefix backend && npm run build --prefix frontend",
+    "format": "npm run format --prefix backend",
+    "soroban:check": "cargo check --manifest-path soroban/Cargo.toml --workspace",
+    "soroban:fmt": "cargo fmt --manifest-path soroban/Cargo.toml --all"
   }
 }

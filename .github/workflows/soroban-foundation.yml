@@ -1,0 +1,29 @@
+name: Soroban Foundation CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - 'soroban/**'
+      - '.github/workflows/soroban-foundation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  soroban-rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: soroban
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Rust fmt check
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Workspace check
+        run: cargo check --workspace
