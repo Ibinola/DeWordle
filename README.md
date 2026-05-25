@@ -23,6 +23,12 @@ This repository now includes a **Soroban Migration Foundation** baseline:
 npm run install:all
 ```
 
+### Validation Shortcuts
+```bash
+npm run verify:frontend
+npm run verify:backend
+```
+
 ### Frontend
 ```bash
 npm run dev --prefix frontend
@@ -45,6 +51,9 @@ cargo check --workspace
 - [Frontend Wallet Foundation](./docs/FRONTEND_WALLET_FOUNDATION.md)
 - [Backend Indexer Foundation](./docs/BACKEND_INDEXER_FOUNDATION.md)
 - [Wave Issue Candidates](./docs/WAVE_MIGRATION_ISSUE_CANDIDATES.md)
+- [Wave 5 Execution Plan](./docs/wave/WAVE5_EXECUTION_PLAN.md)
+- [Wave 5 Phases](./docs/wave/WAVE5_PHASES.md)
+- [Wave 5 Issue Tracks](./docs/wave/WAVE5_ISSUE_TRACKS.md)
 
 ## License
 [MIT](./LICENSE)
