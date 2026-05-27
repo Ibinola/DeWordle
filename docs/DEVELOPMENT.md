@@ -19,3 +19,27 @@
 ## Onchain Notes
 - Current stack: Cairo/Starknet
 - Migration target: Soroban (see `STELLAR_MIGRATION.md`)
+
+## Reproducing CI Locally
+
+Use `scripts/ci-local.sh` to run the same checks as GitHub Actions, in the
+same order, before pushing.
+
+```bash
+# Run all subsets (frontend + backend + soroban)
+./scripts/ci-local.sh
+
+# Run a specific subset
+./scripts/ci-local.sh frontend
+./scripts/ci-local.sh backend
+./scripts/ci-local.sh soroban
+
+# Run multiple subsets
+./scripts/ci-local.sh backend soroban
+```
+
+The script exits non-zero and prints a summary of every failed step, so you
+can see all failures at once rather than stopping at the first one.
+
+**Prerequisites:** Node 20+, npm, Rust stable with `wasm32-unknown-unknown`
+target (`rustup target add wasm32-unknown-unknown`).
