@@ -20,9 +20,14 @@ export class IndexerWorkerService {
     const network = this.configService.get<string>('SOROBAN_NETWORK') || INDEXER_NETWORK_TESTNET;
     const cursor = await this.cursorService.getOrCreate(network, INDEXER_STREAM_CORE_GAME);
 
-    this.logger.debug(
-      `Indexer worker tick from cursor ${cursor.lastLedger}:${cursor.lastTxHash}:${cursor.lastEventIndex}`,
-    );
+    this.logger.log({
+      msg: 'indexer.worker.tick',
+      network,
+      cursorLedger: cursor.lastLedger,
+      cursorTxHash: cursor.lastTxHash,
+      cursorEventIndex: cursor.lastEventIndex,
+      metrics: { ...this.indexerService.metrics },
+    });
 
     await this.indexerService.poll();
   }
