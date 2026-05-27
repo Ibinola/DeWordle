@@ -1,15 +1,22 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useStellarWallet } from "@/hooks/useStellarWallet";
 import { nextLifecycle, reconcileGameplayState, type GameplayTxSnapshot } from "@/lib/stellar/gameplay-flow";
 
 export function useGameplayTx() {
   const wallet = useStellarWallet();
   const [snapshot, setSnapshot] = useState<GameplayTxSnapshot>({});
+  // In-flight lock: prevents duplicate submissions
+  const inFlightRef = useRef(false);
 
   const execute = useCallback(
     async (transactionXdr: string, optimisticSessionId?: string) => {
+      if (inFlightRef.current) {
+        throw new Error("A transaction is already in progress. Please wait.");
+      }
+
+      inFlightRef.current = true;
       const id = crypto.randomUUID();
       wallet.setTxStatus(nextLifecycle(id, "signing"));
       setSnapshot({ pendingId: id, optimisticSessionId });
@@ -42,10 +49,21 @@ export function useGameplayTx() {
           }),
         );
         throw error;
+      } finally {
+        inFlightRef.current = false;
       }
     },
     [wallet],
   );
+
+  /**
+   * Reset snapshot and tx status to idle, enabling a safe retry.
+   */
+  const reset = useCallback(() => {
+    inFlightRef.current = false;
+    setSnapshot({});
+    wallet.setTxStatus({ id: "", state: "idle" });
+  }, [wallet]);
 
   const networkMismatch = useMemo(() => {
     const configured = process.env.NEXT_PUBLIC_STELLAR_NETWORK;
@@ -55,7 +73,9 @@ export function useGameplayTx() {
 
   return {
     execute,
+    reset,
     snapshot,
+    isInFlight: inFlightRef.current,
     networkMismatch,
     walletStatus: wallet.status,
   };
