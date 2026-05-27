@@ -13,6 +13,26 @@ permissions:
   contents: read
 
 jobs:
+  lockfile-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check frontend lockfile is in sync with package.json
+        run: |
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "^frontend/package\.json$"; then
+            if ! git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "^frontend/package-lock\.json$"; then
+              echo "ERROR: frontend/package.json was changed but frontend/package-lock.json was not updated."
+              exit 1
+            fi
+          fi
+      - name: Check backend lockfile is in sync with package.json
+        run: |
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "^backend/package\.json$"; then
+            if ! git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "^backend/package-lock\.json$"; then
+              echo "ERROR: backend/package.json was changed but backend/package-lock.json was not updated."
+              exit 1
+            fi
+          fi
   preflight:
     name: Preflight — environment diagnostics
     runs-on: ubuntu-latest

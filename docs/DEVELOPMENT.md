@@ -28,6 +28,21 @@ Target a specific module only:
 4. Run `./scripts/validate-phase3.sh` to confirm nothing is broken.
 5. Open PR using template.
 
+## Lockfile Freshness Guard
+
+CI enforces that `package-lock.json` is updated whenever `package.json` changes.
+
+**Rule:** If `frontend/package.json` or `backend/package.json` is modified in a PR, the corresponding `package-lock.json` must also be updated in the same commit.
+
+**How to comply:**
+```bash
+# After changing package.json in frontend or backend, regenerate the lockfile:
+cd frontend && npm install   # updates frontend/package-lock.json
+cd backend  && npm install   # updates backend/package-lock.json
+```
+
+If CI fails with `ERROR: package.json was changed but package-lock.json was not updated`, run the command above and amend your commit.
+
 ## Backend Notes
 - API prefix: `/api/v1`
 - Swagger: `/api`
