@@ -16,7 +16,40 @@ permissions:
   contents: read
 
 jobs:
+  preflight:
+    name: Preflight — environment diagnostics
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Runtime versions
+        run: |
+          echo "=== Runtime Versions ==="
+          rustc --version
+          cargo --version
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Runner arch: ${{ runner.arch }}"
+      - name: Lockfile presence
+        run: |
+          echo "=== Lockfile Checks ==="
+          test -f soroban/Cargo.toml && echo "✓ soroban/Cargo.toml" || { echo "✗ soroban/Cargo.toml MISSING"; exit 1; }
+          test -f soroban/Cargo.lock 2>/dev/null && echo "✓ soroban/Cargo.lock" || echo "- soroban/Cargo.lock not present (workspace may generate it)"
+      - name: Cache key inputs
+        run: |
+          echo "=== Cache Key Inputs ==="
+          echo "Cargo.toml hash: $(sha256sum soroban/Cargo.toml | cut -d' ' -f1)"
+      - name: Environment flags
+        run: |
+          echo "=== Environment Flags ==="
+          echo "CI=$CI"
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+
   soroban-rust:
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 25
     defaults:
@@ -28,13 +61,25 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
-      - name: Rust fmt check
-        run: cargo fmt --all -- --check
-      - name: Clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
-      - name: Workspace check
-        run: cargo check --workspace
-      - name: Unit tests
-        run: cargo test --workspace
-      - name: Wasm release build
-        run: cargo build --workspace --target wasm32-unknown-unknown --release
+      - name: Run Rust checks (capture log)
+        id: ci_steps
+        run: |
+          set -o pipefail
+          {
+            cargo fmt --all -- --check
+            cargo clippy --workspace --all-targets -- -D warnings
+            cargo check --workspace
+            cargo test --workspace
+            cargo build --workspace --target wasm32-unknown-unknown --release
+          } 2>&1 | tee /tmp/soroban-ci.log
+      - name: Categorize failure
+        if: failure()
+        working-directory: ${{ github.workspace }}
+        run: bash scripts/categorize-failure.sh /tmp/soroban-ci.log soroban-failure-summary.json
+      - name: Upload failure summary artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soroban-failure-summary
+          path: soroban-failure-summary.json
+          retention-days: 7

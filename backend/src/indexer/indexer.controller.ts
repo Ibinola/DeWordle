@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
 import { IndexerService } from './indexer.service';
 import { IngestedEventDto } from './dto/ingested-event.dto';
 
@@ -7,6 +7,7 @@ export class IndexerController {
   constructor(private readonly indexerService: IndexerService) {}
 
   @Post('ingest')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false, transform: true }))
   async ingest(@Body() event: IngestedEventDto) {
     await this.indexerService.ingest({
       ...event,

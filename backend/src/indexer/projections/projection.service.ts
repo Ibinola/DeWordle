@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SessionProjectionEntity } from '../entities/session-projection.entity';
@@ -6,19 +6,26 @@ import { IngestedEventDto } from '../dto/ingested-event.dto';
 
 @Injectable()
 export class ProjectionService {
+  private readonly logger = new Logger(ProjectionService.name);
+
   constructor(
     @InjectRepository(SessionProjectionEntity)
     private readonly sessionsRepo: Repository<SessionProjectionEntity>,
   ) {}
 
-  async apply(event: IngestedEventDto) {
+  /**
+   * Applies an event to the projection. Idempotent: replaying the same
+   * session_finalized event produces the same projection state (upsert by sessionId).
+   */
+  async apply(event: IngestedEventDto): Promise<boolean> {
     if (event.topic !== 'session_finalized') {
-      return;
+      return false;
     }
 
     const sessionId = String(event.payload.sessionId ?? '');
     if (!sessionId) {
-      return;
+      this.logger.warn(`session_finalized event missing sessionId txHash=${event.txHash}`);
+      return false;
     }
 
     const existing = await this.sessionsRepo.findOne({
@@ -37,5 +44,6 @@ export class ProjectionService {
     });
 
     await this.sessionsRepo.save(projection);
+    return true;
   }
 }

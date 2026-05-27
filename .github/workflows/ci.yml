@@ -33,8 +33,41 @@ jobs:
               exit 1
             fi
           fi
+  preflight:
+    name: Preflight — environment diagnostics
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Runtime versions
+        run: |
+          echo "=== Runtime Versions ==="
+          node --version
+          npm --version
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Runner arch: ${{ runner.arch }}"
+      - name: Lockfile presence
+        run: |
+          echo "=== Lockfile Checks ==="
+          test -f backend/package-lock.json  && echo "✓ backend/package-lock.json" || { echo "✗ backend/package-lock.json MISSING"; exit 1; }
+          test -f frontend/package-lock.json && echo "✓ frontend/package-lock.json" || { echo "✗ frontend/package-lock.json MISSING"; exit 1; }
+      - name: Cache key inputs
+        run: |
+          echo "=== Cache Key Inputs ==="
+          echo "backend lockfile hash:  $(sha256sum backend/package-lock.json | cut -d' ' -f1)"
+          echo "frontend lockfile hash: $(sha256sum frontend/package-lock.json | cut -d' ' -f1)"
+      - name: Environment flags
+        run: |
+          echo "=== Environment Flags ==="
+          echo "CI=$CI"
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
 
   backend:
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -50,11 +83,25 @@ jobs:
       - run: node --version && npm --version
       - run: test -f package-lock.json
       - run: npm ci --include=dev
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run test -- --runInBand
+      - name: Run lint, typecheck, tests (capture log)
+        id: ci_steps
+        run: |
+          set -o pipefail
+          { npm run lint && npm run typecheck && npm run test -- --runInBand; } 2>&1 | tee /tmp/backend-ci.log
+      - name: Categorize failure
+        if: failure()
+        working-directory: ${{ github.workspace }}
+        run: bash scripts/categorize-failure.sh /tmp/backend-ci.log backend-failure-summary.json
+      - name: Upload failure summary artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-failure-summary
+          path: backend-failure-summary.json
+          retention-days: 7
 
   frontend:
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -70,6 +117,19 @@ jobs:
       - run: node --version && npm --version
       - run: test -f package-lock.json
       - run: npm ci --include=dev
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run build
+      - name: Run lint, typecheck, build (capture log)
+        id: ci_steps
+        run: |
+          set -o pipefail
+          { npm run lint && npm run typecheck && npm run build; } 2>&1 | tee /tmp/frontend-ci.log
+      - name: Categorize failure
+        if: failure()
+        working-directory: ${{ github.workspace }}
+        run: bash scripts/categorize-failure.sh /tmp/frontend-ci.log frontend-failure-summary.json
+      - name: Upload failure summary artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-failure-summary
+          path: frontend-failure-summary.json
+          retention-days: 7

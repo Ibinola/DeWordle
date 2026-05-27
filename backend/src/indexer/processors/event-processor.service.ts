@@ -8,6 +8,7 @@ import { ProjectionService } from '../projections/projection.service';
 @Injectable()
 export class EventProcessorService {
   private readonly logger = new Logger(EventProcessorService.name);
+  private replaySkipCount = 0;
 
   constructor(
     @InjectRepository(IngestedEventEntity)
@@ -25,12 +26,19 @@ export class EventProcessorService {
     });
 
     if (exists) {
-      this.logger.debug(`Skipping replayed event ${event.txHash}#${event.eventIndex}`);
+      this.replaySkipCount++;
+      this.logger.debug(
+        `Duplicate event skipped txHash=${event.txHash} eventIndex=${event.eventIndex} totalSkipped=${this.replaySkipCount}`,
+      );
       return false;
     }
 
     await this.eventsRepo.save(this.eventsRepo.create(event));
     await this.projectionService.apply(event);
     return true;
+  }
+
+  getReplaySkipCount(): number {
+    return this.replaySkipCount;
   }
 }
