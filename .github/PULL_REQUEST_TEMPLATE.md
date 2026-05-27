@@ -27,3 +27,12 @@
 - [ ] I added or updated tests where relevant
 - [ ] I updated docs where relevant
 - [ ] I kept the scope focused
+
+## Wave Contributor Checklist (Stellar Wave issues only)
+- [ ] PR title follows `[W5][TRACK][SIZE] description` convention
+- [ ] All acceptance criteria from the linked issue are addressed
+- [ ] Validation evidence included (commands run + outputs)
+- [ ] No cross-track changes without explicit note
+- [ ] Architectural changes reflected in docs or ADR (if applicable)
+
+<!-- Reviewer: see docs/wave/REVIEWER_PLAYBOOK.md for lane assignments and SLA targets -->
