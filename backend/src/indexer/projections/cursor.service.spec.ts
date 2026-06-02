@@ -85,3 +85,56 @@ describe('CursorService.checkpoint', () => {
     expect(saved.length).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe('CursorService – rollback failure simulation', () => {
+  it('rejects a rollback attempt and does not persist the regressed position', async () => {
+    const { svc, repo, saved } = makeService(makeCursorEntity(100, 'tx_abc', 3));
+    // Simulate a rollback: attacker/bug tries to rewind ledger
+    const accepted = await svc.checkpoint('testnet', 'core_game', 50, 'tx_abc', 3);
+    expect(accepted).toBe(false);
+    // Cursor state must be unchanged — no save after the failed checkpoint
+    expect(saved).toHaveLength(0);
+    // getOrCreate read the existing cursor
+    expect(repo.findOne).toHaveBeenCalledTimes(1);
+  });
+
+  it('recovers correctly after a rollback rejection: subsequent valid advance is persisted', async () => {
+    const cursor = makeCursorEntity(100, 'tx_abc', 3);
+    const { svc, saved } = makeService(cursor);
+
+    // rollback rejected
+    await svc.checkpoint('testnet', 'core_game', 50, 'tx_abc', 3);
+    expect(saved).toHaveLength(0);
+
+    // valid advance after the failed rollback
+    const accepted = await svc.checkpoint('testnet', 'core_game', 101, 'tx_abc', 0);
+    expect(accepted).toBe(true);
+    expect(saved[0].lastLedger).toBe(101);
+  });
+
+  it('rejects a mid-stream cursor rewind across multiple rapid rollback attempts', async () => {
+    const { svc, saved } = makeService(makeCursorEntity(200, 'tx_z', 0));
+    const regressPositions = [
+      [199, 'tx_z', 0],
+      [198, 'tx_a', 5],
+      [1,   'tx_z', 0],
+    ] as const;
+
+    for (const [ledger, tx, idx] of regressPositions) {
+      const result = await svc.checkpoint('testnet', 'core_game', ledger, tx, idx);
+      expect(result).toBe(false);
+    }
+    expect(saved).toHaveLength(0);
+  });
+
+  it('does not persist checkpoint when repo.save throws (simulates DB failure during rollback recovery)', async () => {
+    const cursor = makeCursorEntity(10, 'tx1', 0);
+    const repo = {
+      findOne: jest.fn().mockResolvedValue(cursor),
+      create: jest.fn((d) => Object.assign(new IndexerCursorEntity(), d)),
+      save: jest.fn().mockRejectedValue(new Error('DB write failure')),
+    };
+    const svc = new CursorService(repo as any);
+    await expect(svc.checkpoint('testnet', 'core_game', 11, 'tx2', 0)).rejects.toThrow('DB write failure');
+  });
+});
