@@ -3,12 +3,21 @@
 
 const { spawnSync } = require("node:child_process");
 
+const REMEDIATION = {
+  node: "Install Node.js >= 18 from https://nodejs.org or use nvm: `nvm install 20`",
+  npm: "npm ships with Node.js. Reinstall Node.js from https://nodejs.org",
+  rustc: "Install Rust: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`",
+  cargo: "Install Rust (includes cargo): `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`",
+};
+
 function checkCommand(command, args = ["--version"]) {
   const result = spawnSync(command, args, { encoding: "utf8" });
+  const ok = !result.error && result.status === 0;
   return {
     command,
-    ok: !result.error && result.status === 0,
+    ok,
     output: (result.stdout || result.stderr || "").trim(),
+    ...(ok ? {} : { remediation: REMEDIATION[command] ?? `Install \`${command}\` and ensure it is on your PATH` }),
   };
 }
 
@@ -58,6 +67,7 @@ if (require.main === module) {
     console.log("Contributor bootstrap diagnostics");
     for (const check of result.checks) {
       console.log(`${check.ok ? "✓" : "✗"} ${check.command}${check.output ? ` (${check.output})` : ""}`);
+      if (!check.ok) console.log(`  → ${check.remediation}`);
     }
     console.log("");
     console.log(`Track: ${track}`);
