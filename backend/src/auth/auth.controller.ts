@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import type { Request as ExpressRequest } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -262,7 +263,7 @@ export class AuthController {
       },
     },
   })
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: ExpressRequest & { user: { id: number } }) {
     return this.authService.getProfile(req.user.id);
   }
 }
